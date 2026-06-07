@@ -4,6 +4,7 @@ import { useAuth } from "./hooks/useAuth";
 import { useSubmissions } from "./hooks/useSubmissions";
 import { AddNameModal } from "./components/AddNameModal";
 import { AdminPanel } from "./components/AdminPanel";
+import { exportToExcel } from "./utils/exportExcel";
 
 const DEPT_COLORS: Record<string, { bg: string; border: string; badge: string; text: string }> = {
   "Agric":              { bg: "bg-emerald-50",  border: "border-emerald-200",  badge: "bg-emerald-100 text-emerald-800",  text: "text-emerald-700" },
@@ -193,6 +194,18 @@ export default function App() {
                     <rect x="6" y="14" width="12" height="8"/>
                   </svg>
                   Print / PDF
+                </button>
+
+                {/* Export Excel */}
+                <button
+                  onClick={() => exportToExcel(filtered, filteredTotal, activeDept)}
+                  title={activeDept ? `Export ${activeDept} to Excel` : "Export all departments to Excel"}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium shadow-sm hover:bg-emerald-700 active:bg-emerald-800 transition-colors whitespace-nowrap"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                  </svg>
+                  Export Excel
                 </button>
 
                 {/* Admin */}
