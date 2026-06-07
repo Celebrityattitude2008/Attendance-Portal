@@ -51,117 +51,172 @@ export default function App() {
     [filtered]
   );
 
+  function handlePrint() {
+    window.print();
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-                Attendance Roster
-              </h1>
-              <p className="text-sm text-slate-500 mt-0.5">
-                {filteredTotal} of {totalCount} students across {DEPARTMENT_ORDER.length} departments
-              </p>
-            </div>
-            <input
-              type="search"
-              placeholder="Search by name or matric no..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full sm:w-72 px-4 py-2 rounded-lg border border-slate-300 text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-400"
-            />
-          </div>
-
-          {/* Department filter pills */}
-          <div className="flex flex-wrap gap-2 mt-3">
-            <button
-              onClick={() => setActiveDept(null)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                activeDept === null
-                  ? "bg-slate-800 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
-            >
-              All
-            </button>
-            {DEPARTMENT_ORDER.map((dept) => {
-              const colors = DEPT_COLORS[dept] ?? { badge: "bg-slate-100 text-slate-700" };
-              const count = attendanceData[dept]?.length ?? 0;
-              return (
-                <button
-                  key={dept}
-                  onClick={() => setActiveDept(activeDept === dept ? null : dept)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                    activeDept === dept
-                      ? "ring-2 ring-offset-1 ring-slate-400 " + colors.badge
-                      : colors.badge + " hover:opacity-80"
-                  }`}
-                >
-                  {dept} ({count})
-                </button>
-              );
-            })}
-          </div>
+      {/* ── Print-only full roster ── */}
+      <div className="print-only" aria-hidden="true">
+        <div className="print-title-block">
+          <h1 className="print-title">Attendance Roster</h1>
+          <p className="print-subtitle">
+            {totalCount} students &nbsp;·&nbsp; {DEPARTMENT_ORDER.length} departments
+          </p>
+          <p className="print-date">Printed: {new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}</p>
         </div>
-      </header>
 
-      {/* Main content */}
-      <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        {Object.keys(filtered).length === 0 ? (
-          <div className="text-center py-20 text-slate-400">
-            <p className="text-lg font-medium">No results found</p>
-            <p className="text-sm mt-1">Try a different name or matric number</p>
-          </div>
-        ) : (
-          Object.entries(filtered).map(([dept, students]) => {
-            const colors = DEPT_COLORS[dept] ?? {
-              bg: "bg-slate-50",
-              border: "border-slate-200",
-              badge: "bg-slate-100 text-slate-700",
-              text: "text-slate-700",
-            };
+        {DEPARTMENT_ORDER.map((dept) => {
+          const students = attendanceData[dept] ?? [];
+          if (students.length === 0) return null;
+          return (
+            <div key={dept} className="print-dept-block">
+              <div className="print-dept-header">
+                <span className="print-dept-name">{dept}</span>
+                <span className="print-dept-count">{students.length} student{students.length !== 1 ? "s" : ""}</span>
+              </div>
+              <ol className="print-student-list">
+                {students.map((s, i) => (
+                  <li key={s.matricNo + i} className="print-student-row">
+                    <span className="print-student-num">{i + 1}.</span>
+                    <span className="print-student-name">{toTitleCase(s.name)}</span>
+                    <span className="print-student-matric">{s.matricNo}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          );
+        })}
 
-            return (
-              <section
-                key={dept}
-                className={`rounded-xl border ${colors.border} ${colors.bg} overflow-hidden shadow-sm`}
+        <div className="print-footer">
+          Total: {totalCount} students across {DEPARTMENT_ORDER.length} departments
+        </div>
+      </div>
+
+      {/* ── Screen UI ── */}
+      <div className="no-print">
+        {/* Header */}
+        <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                  Attendance Roster
+                </h1>
+                <p className="text-sm text-slate-500 mt-0.5">
+                  {filteredTotal} of {totalCount} students across {DEPARTMENT_ORDER.length} departments
+                </p>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                <input
+                  type="search"
+                  placeholder="Search by name or matric no..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full sm:w-64 px-4 py-2 rounded-lg border border-slate-300 text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-400"
+                />
+                <button
+                  onClick={handlePrint}
+                  title="Export full roster as PDF"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-slate-800 text-white text-sm font-medium shadow-sm hover:bg-slate-700 active:bg-slate-900 transition-colors whitespace-nowrap"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 6 2 18 2 18 9"/>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                    <rect x="6" y="14" width="12" height="8"/>
+                  </svg>
+                  Print / Export PDF
+                </button>
+              </div>
+            </div>
+
+            {/* Department filter pills */}
+            <div className="flex flex-wrap gap-2 mt-3">
+              <button
+                onClick={() => setActiveDept(null)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  activeDept === null
+                    ? "bg-slate-800 text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
               >
-                {/* Department header */}
-                <div className={`px-5 py-3 border-b ${colors.border} flex items-center justify-between`}>
-                  <h2 className={`font-bold text-base ${colors.text}`}>{dept}</h2>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${colors.badge}`}>
-                    {students.length} student{students.length !== 1 ? "s" : ""}
-                  </span>
-                </div>
+                All
+              </button>
+              {DEPARTMENT_ORDER.map((dept) => {
+                const colors = DEPT_COLORS[dept] ?? { badge: "bg-slate-100 text-slate-700" };
+                const count = attendanceData[dept]?.length ?? 0;
+                return (
+                  <button
+                    key={dept}
+                    onClick={() => setActiveDept(activeDept === dept ? null : dept)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      activeDept === dept
+                        ? "ring-2 ring-offset-1 ring-slate-400 " + colors.badge
+                        : colors.badge + " hover:opacity-80"
+                    }`}
+                  >
+                    {dept} ({count})
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </header>
 
-                {/* Student grid */}
-                <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                  {students.map((student, idx) => (
-                    <div
-                      key={student.matricNo + idx}
-                      className="bg-white rounded-lg border border-white/80 shadow-sm px-3 py-2.5 hover:shadow-md transition-shadow"
-                    >
-                      <p className="text-sm font-semibold text-slate-800 leading-tight">
-                        {toTitleCase(student.name)}
-                      </p>
-                      <p className="text-xs text-slate-400 mt-0.5 font-mono tracking-tight">
-                        {student.matricNo}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            );
-          })
-        )}
-      </main>
+        {/* Main content */}
+        <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+          {Object.keys(filtered).length === 0 ? (
+            <div className="text-center py-20 text-slate-400">
+              <p className="text-lg font-medium">No results found</p>
+              <p className="text-sm mt-1">Try a different name or matric number</p>
+            </div>
+          ) : (
+            Object.entries(filtered).map(([dept, students]) => {
+              const colors = DEPT_COLORS[dept] ?? {
+                bg: "bg-slate-50",
+                border: "border-slate-200",
+                badge: "bg-slate-100 text-slate-700",
+                text: "text-slate-700",
+              };
 
-      {/* Footer */}
-      <footer className="text-center py-6 text-xs text-slate-400">
-        Total attendance: {totalCount} students &nbsp;·&nbsp; {DEPARTMENT_ORDER.length} departments
-      </footer>
+              return (
+                <section
+                  key={dept}
+                  className={`rounded-xl border ${colors.border} ${colors.bg} overflow-hidden shadow-sm`}
+                >
+                  <div className={`px-5 py-3 border-b ${colors.border} flex items-center justify-between`}>
+                    <h2 className={`font-bold text-base ${colors.text}`}>{dept}</h2>
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${colors.badge}`}>
+                      {students.length} student{students.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+
+                  <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                    {students.map((student, idx) => (
+                      <div
+                        key={student.matricNo + idx}
+                        className="bg-white rounded-lg border border-white/80 shadow-sm px-3 py-2.5 hover:shadow-md transition-shadow"
+                      >
+                        <p className="text-sm font-semibold text-slate-800 leading-tight">
+                          {toTitleCase(student.name)}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-0.5 font-mono tracking-tight">
+                          {student.matricNo}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            })
+          )}
+        </main>
+
+        <footer className="text-center py-6 text-xs text-slate-400">
+          Total attendance: {totalCount} students &nbsp;·&nbsp; {DEPARTMENT_ORDER.length} departments
+        </footer>
+      </div>
     </div>
   );
 }

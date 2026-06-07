@@ -12,3 +12,141 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+/* ── Screen: hide print-only layer ── */
+.print-only {
+  display: none;
+}
+
+/* ── Print styles ── */
+@media print {
+  /* Hide the screen UI */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Show the print layer */
+  .print-only {
+    display: block;
+  }
+
+  /* Page setup */
+  @page {
+    size: A4 portrait;
+    margin: 18mm 14mm 16mm 14mm;
+  }
+
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 9pt;
+    color: #1e293b;
+    background: #fff;
+  }
+
+  /* Title block */
+  .print-title-block {
+    border-bottom: 2px solid #1e293b;
+    padding-bottom: 6pt;
+    margin-bottom: 14pt;
+  }
+
+  .print-title {
+    font-size: 18pt;
+    font-weight: 700;
+    margin: 0 0 2pt 0;
+    letter-spacing: -0.3pt;
+  }
+
+  .print-subtitle {
+    font-size: 9pt;
+    color: #475569;
+    margin: 0;
+  }
+
+  .print-date {
+    font-size: 8pt;
+    color: #94a3b8;
+    margin: 2pt 0 0 0;
+  }
+
+  /* Department block */
+  .print-dept-block {
+    break-inside: avoid;
+    margin-bottom: 12pt;
+  }
+
+  .print-dept-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    background: #f1f5f9;
+    border-left: 4pt solid #334155;
+    padding: 3pt 6pt;
+    margin-bottom: 4pt;
+  }
+
+  .print-dept-name {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.1pt;
+    text-transform: uppercase;
+  }
+
+  .print-dept-count {
+    font-size: 8pt;
+    color: #64748b;
+    font-weight: 400;
+  }
+
+  /* Student list */
+  .print-student-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    columns: 2;
+    column-gap: 18pt;
+  }
+
+  .print-student-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4pt;
+    padding: 1.8pt 0;
+    border-bottom: 0.5pt solid #e2e8f0;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-student-num {
+    font-size: 7.5pt;
+    color: #94a3b8;
+    min-width: 14pt;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .print-student-name {
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: #1e293b;
+    flex: 1;
+  }
+
+  .print-student-matric {
+    font-size: 7pt;
+    color: #94a3b8;
+    font-family: 'Courier New', Courier, monospace;
+    flex-shrink: 0;
+  }
+
+  /* Footer */
+  .print-footer {
+    margin-top: 14pt;
+    padding-top: 6pt;
+    border-top: 1pt solid #cbd5e1;
+    font-size: 8pt;
+    color: #64748b;
+    text-align: center;
+  }
+}
