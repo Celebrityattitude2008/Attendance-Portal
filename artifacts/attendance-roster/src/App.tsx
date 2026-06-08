@@ -35,7 +35,7 @@ export default function App() {
   const [adminLoggingIn, setAdminLoggingIn] = useState(false);
 
   const { user, isAdmin, loginWithGoogle, logout } = useAuth();
-  const { pending, approved, addSubmission, approveSubmission, rejectSubmission, deleteSubmission } = useSubmissions();
+  const { pending, approved, addSubmission, approveSubmission, rejectSubmission, deleteSubmission } = useSubmissions(isAdmin);
 
   // Merge static data with approved firebase submissions, grouped by dept
   const mergedData = useMemo(() => {

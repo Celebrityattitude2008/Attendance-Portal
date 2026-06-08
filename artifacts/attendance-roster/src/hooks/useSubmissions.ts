@@ -9,6 +9,7 @@ import {
   serverTimestamp,
   query,
   orderBy,
+  where,
 } from "firebase/firestore";
 import { db } from "../firebase";
 
@@ -21,23 +22,57 @@ export interface Submission {
   createdAt: Date | null;
 }
 
-export function useSubmissions() {
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
+export function useSubmissions(isAdmin: boolean) {
+  const [approved, setApproved] = useState<Submission[]>([]);
+  const [pending, setPending] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Everyone can read approved submissions — filtered query passes security rules
   useEffect(() => {
-    const q = query(collection(db, "submissions"), orderBy("createdAt", "desc"));
-    const unsub = onSnapshot(q, (snap) => {
-      const docs = snap.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-        createdAt: d.data().createdAt?.toDate() ?? null,
-      })) as Submission[];
-      setSubmissions(docs);
-      setLoading(false);
-    });
+    const q = query(
+      collection(db, "submissions"),
+      where("status", "==", "approved"),
+      orderBy("createdAt", "desc")
+    );
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const docs = snap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+          createdAt: d.data().createdAt?.toDate() ?? null,
+        })) as Submission[];
+        setApproved(docs);
+        setLoading(false);
+      },
+      () => {
+        setLoading(false);
+      }
+    );
     return unsub;
   }, []);
+
+  // Only admins fetch all submissions (to see pending/rejected)
+  useEffect(() => {
+    if (!isAdmin) {
+      setPending([]);
+      return;
+    }
+    const q = query(collection(db, "submissions"), orderBy("createdAt", "desc"));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const docs = snap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+          createdAt: d.data().createdAt?.toDate() ?? null,
+        })) as Submission[];
+        setPending(docs.filter((s) => s.status === "pending"));
+      },
+      () => {}
+    );
+    return unsub;
+  }, [isAdmin]);
 
   async function addSubmission(name: string, matricNo: string, department: string) {
     await addDoc(collection(db, "submissions"), {
@@ -61,8 +96,5 @@ export function useSubmissions() {
     await deleteDoc(doc(db, "submissions", id));
   }
 
-  const pending = submissions.filter((s) => s.status === "pending");
-  const approved = submissions.filter((s) => s.status === "approved");
-
-  return { submissions, pending, approved, loading, addSubmission, approveSubmission, rejectSubmission, deleteSubmission };
+  return { approved, pending, loading, addSubmission, approveSubmission, rejectSubmission, deleteSubmission };
 }
