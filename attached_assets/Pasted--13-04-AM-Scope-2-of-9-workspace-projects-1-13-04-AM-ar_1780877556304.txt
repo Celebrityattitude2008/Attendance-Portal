@@ -1,0 +1,46 @@
+:13:04 AM: Scope: 2 of 9 workspace projects
+1:13:04 AM: artifacts/attendance-roster build$ vite build --config vite.config.ts
+1:13:04 AM: artifacts/attendance-roster build: failed to load config from /opt/build/repo/artifacts/attendance-roster/vite.config.ts
+1:13:04 AM: artifacts/attendance-roster build: error during build:
+1:13:04 AM: artifacts/attendance-roster build: Error: PORT environment variable is required but was not provided.
+1:13:04 AM: artifacts/attendance-roster build:     at file:///opt/build/repo/artifacts/attendance-roster/node_modules/.vite-temp/vite.config.ts.timestamp-1780877584463-b2c311358cbdd.mjs:10:9
+1:13:04 AM: artifacts/attendance-roster build:     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+1:13:04 AM: artifacts/attendance-roster build:     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+1:13:04 AM: artifacts/attendance-roster build:     at async loadConfigFromBundledFile (file:///opt/build/repo/node_modules/.pnpm/vite@7.3.3_@types+node@25.6.2_jiti@2.7.0_lightningcss@1.32.0_tsx@4.21.0_yaml@2.8.4/node_modules/vite/dist/node/chunks/config.js:35936:12)
+1:13:04 AM: artifacts/attendance-roster build:     at async bundleAndLoadConfigFile (file:///opt/build/repo/node_modules/.pnpm/vite@7.3.3_@types+node@25.6.2_jiti@2.7.0_lightningcss@1.32.0_tsx@4.21.0_yaml@2.8.4/node_modules/vite/dist/node/chunks/config.js:35824:17)
+1:13:04 AM: artifacts/attendance-roster build:     at async loadConfigFromFile (file:///opt/build/repo/node_modules/.pnpm/vite@7.3.3_@types+node@25.6.2_jiti@2.7.0_lightningcss@1.32.0_tsx@4.21.0_yaml@2.8.4/node_modules/vite/dist/node/chunks/config.js:35791:42)
+1:13:04 AM: artifacts/attendance-roster build:     at async resolveConfig (file:///opt/build/repo/node_modules/.pnpm/vite@7.3.3_@types+node@25.6.2_jiti@2.7.0_lightningcss@1.32.0_tsx@4.21.0_yaml@2.8.4/node_modules/vite/dist/node/chunks/config.js:35440:22)
+1:13:04 AM: artifacts/attendance-roster build:     at async createBuilder (file:///opt/build/repo/node_modules/.pnpm/vite@7.3.3_@types+node@25.6.2_jiti@2.7.0_lightningcss@1.32.0_tsx@4.21.0_yaml@2.8.4/node_modules/vite/dist/node/chunks/config.js:33895:19)
+1:13:04 AM: artifacts/attendance-roster build:     at async CAC.<anonymous> (file:///opt/build/repo/node_modules/.pnpm/vite@7.3.3_@types+node@25.6.2_jiti@2.7.0_lightningcss@1.32.0_tsx@4.21.0_yaml@2.8.4/node_modules/vite/dist/node/cli.js:629:10)
+1:13:04 AM: artifacts/attendance-roster build: Failed
+1:13:04 AM: /opt/build/repo/artifacts/attendance-roster:
+1:13:04 AM:  ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @workspace/attendance-roster@0.0.0 build: `vite build --config vite.config.ts`
+1:13:04 AM: Exit status 1
+1:13:05 AM: ​
+1:13:05 AM: "build.command" failed                                        
+1:13:05 AM: ────────────────────────────────────────────────────────────────
+1:13:05 AM: ​
+1:13:05 AM:   Error message
+1:13:05 AM:   Command failed with exit code 1: pnpm --filter @workspace/attendance-roster... run build (https://ntl.fyi/exit-code-1)
+1:13:05 AM: ​
+1:13:05 AM:   Error location
+1:13:05 AM:   In Build command from Netlify app:
+1:13:05 AM:   pnpm --filter @workspace/attendance-roster... run build
+1:13:05 AM: ​
+1:13:05 AM:   Resolved config
+1:13:05 AM:   build:
+1:13:05 AM:     command: pnpm --filter @workspace/attendance-roster... run build
+1:13:05 AM:     commandOrigin: ui
+1:13:05 AM:     environment:
+1:13:05 AM:       - VITE_ADMIN_EMAIL
+1:13:05 AM:       - VITE_FIREBASE_API_KEY
+1:13:05 AM:       - VITE_FIREBASE_APP_ID
+1:13:05 AM:       - VITE_FIREBASE_AUTH_DOMAIN
+1:13:05 AM:       - VITE_FIREBASE_MESSAGING_SENDER_ID
+1:13:05 AM:       - VITE_FIREBASE_PROJECT_ID
+1:13:05 AM:       - VITE_FIREBASE_STORAGE_BUCKET
+1:13:05 AM:     publish: /opt/build/repo/artifacts/attendance-roster/dist
+1:13:05 AM:     publishOrigin: ui
+1:13:05 AM: Build failed due to a user error: Build script returned non-zero exit code: 2
+1:13:05 AM: Failing build: Failed to build site
+1:13:05 AM: Finished processing build request in 32.598s
