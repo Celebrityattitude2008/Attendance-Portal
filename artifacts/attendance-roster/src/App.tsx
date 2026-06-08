@@ -1,23 +1,19 @@
 import { useState, useMemo } from "react";
 import { attendanceData, DEPARTMENT_ORDER } from "./data/attendance";
-import { useAuth } from "./hooks/useAuth";
-import { useSubmissions } from "./hooks/useSubmissions";
-import { AddNameModal } from "./components/AddNameModal";
-import { AdminPanel } from "./components/AdminPanel";
 import { exportToExcel } from "./utils/exportExcel";
 
 const DEPT_COLORS: Record<string, { bg: string; border: string; badge: string; text: string }> = {
-  "Agric":              { bg: "bg-emerald-50",  border: "border-emerald-200",  badge: "bg-emerald-100 text-emerald-800",  text: "text-emerald-700" },
-  "Anatomy":            { bg: "bg-purple-50",   border: "border-purple-200",   badge: "bg-purple-100 text-purple-800",    text: "text-purple-700" },
-  "Bio Chemistry":      { bg: "bg-amber-50",    border: "border-amber-200",    badge: "bg-amber-100 text-amber-800",      text: "text-amber-700" },
-  "Computer Science":   { bg: "bg-blue-50",     border: "border-blue-200",     badge: "bg-blue-100 text-blue-800",        text: "text-blue-700" },
-  "Engineering":        { bg: "bg-orange-50",   border: "border-orange-200",   badge: "bg-orange-100 text-orange-800",    text: "text-orange-700" },
-  "Geo Physics":        { bg: "bg-teal-50",     border: "border-teal-200",     badge: "bg-teal-100 text-teal-800",        text: "text-teal-700" },
-  "Med Lab":            { bg: "bg-rose-50",     border: "border-rose-200",     badge: "bg-rose-100 text-rose-800",        text: "text-rose-700" },
-  "Medicine and Surgery":{ bg: "bg-red-50",     border: "border-red-200",      badge: "bg-red-100 text-red-800",          text: "text-red-700" },
-  "Micro Biology":      { bg: "bg-lime-50",     border: "border-lime-200",     badge: "bg-lime-100 text-lime-800",        text: "text-lime-700" },
-  "Nursing":            { bg: "bg-pink-50",     border: "border-pink-200",     badge: "bg-pink-100 text-pink-800",        text: "text-pink-700" },
-  "Physiology":         { bg: "bg-indigo-50",   border: "border-indigo-200",   badge: "bg-indigo-100 text-indigo-800",    text: "text-indigo-700" },
+  "Agric":               { bg: "bg-emerald-50",  border: "border-emerald-200",  badge: "bg-emerald-100 text-emerald-800",  text: "text-emerald-700" },
+  "Anatomy":             { bg: "bg-purple-50",   border: "border-purple-200",   badge: "bg-purple-100 text-purple-800",    text: "text-purple-700" },
+  "Bio Chemistry":       { bg: "bg-amber-50",    border: "border-amber-200",    badge: "bg-amber-100 text-amber-800",      text: "text-amber-700" },
+  "Computer Science":    { bg: "bg-blue-50",     border: "border-blue-200",     badge: "bg-blue-100 text-blue-800",        text: "text-blue-700" },
+  "Engineering":         { bg: "bg-orange-50",   border: "border-orange-200",   badge: "bg-orange-100 text-orange-800",    text: "text-orange-700" },
+  "Geo Physics":         { bg: "bg-teal-50",     border: "border-teal-200",     badge: "bg-teal-100 text-teal-800",        text: "text-teal-700" },
+  "Med Lab":             { bg: "bg-rose-50",     border: "border-rose-200",     badge: "bg-rose-100 text-rose-800",        text: "text-rose-700" },
+  "Medicine and Surgery":{ bg: "bg-red-50",      border: "border-red-200",      badge: "bg-red-100 text-red-800",          text: "text-red-700" },
+  "Micro Biology":       { bg: "bg-lime-50",     border: "border-lime-200",     badge: "bg-lime-100 text-lime-800",        text: "text-lime-700" },
+  "Nursing":             { bg: "bg-pink-50",     border: "border-pink-200",     badge: "bg-pink-100 text-pink-800",        text: "text-pink-700" },
+  "Physiology":          { bg: "bg-indigo-50",   border: "border-indigo-200",   badge: "bg-indigo-100 text-indigo-800",    text: "text-indigo-700" },
 };
 
 function toTitleCase(str: string) {
@@ -30,50 +26,17 @@ function toTitleCase(str: string) {
 export default function App() {
   const [search, setSearch] = useState("");
   const [activeDept, setActiveDept] = useState<string | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [adminLoggingIn, setAdminLoggingIn] = useState(false);
-
-  const { user, isAdmin, loginWithGoogle, logout } = useAuth();
-  const { pending, approved, addSubmission, approveSubmission, rejectSubmission, deleteSubmission } = useSubmissions(isAdmin);
-
-  // Merge static data with approved firebase submissions, grouped by dept
-  const mergedData = useMemo(() => {
-    const result: Record<string, { matricNo: string; name: string; source: "static" | "dynamic" }[]> = {};
-    for (const dept of DEPARTMENT_ORDER) {
-      result[dept] = (attendanceData[dept] ?? []).map((s) => ({ ...s, source: "static" as const }));
-    }
-    for (const sub of approved) {
-      const dept = sub.department;
-      if (!result[dept]) result[dept] = [];
-      const alreadyExists = result[dept].some(
-        (s) => s.matricNo.trim().toLowerCase() === sub.matricNo.trim().toLowerCase()
-      );
-      if (!alreadyExists) {
-        result[dept].push({ matricNo: sub.matricNo, name: sub.name, source: "dynamic" });
-      }
-    }
-    return result;
-  }, [approved]);
 
   const totalCount = useMemo(
-    () => Object.values(mergedData).reduce((sum, arr) => sum + arr.length, 0),
-    [mergedData]
+    () => DEPARTMENT_ORDER.reduce((sum, d) => sum + (attendanceData[d]?.length ?? 0), 0),
+    []
   );
-
-  const allDepts = useMemo(() => {
-    const depts = [...DEPARTMENT_ORDER];
-    for (const sub of approved) {
-      if (!depts.includes(sub.department)) depts.push(sub.department);
-    }
-    return depts;
-  }, [approved]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return allDepts.reduce<Record<string, typeof mergedData[string]>>((acc, dept) => {
+    return DEPARTMENT_ORDER.reduce<Record<string, { matricNo: string; name: string }[]>>((acc, dept) => {
       if (activeDept && activeDept !== dept) return acc;
-      const students = (mergedData[dept] ?? []).filter(
+      const students = (attendanceData[dept] ?? []).filter(
         (s) =>
           !q ||
           s.name.toLowerCase().includes(q) ||
@@ -82,24 +45,14 @@ export default function App() {
       if (students.length > 0) acc[dept] = students;
       return acc;
     }, {});
-  }, [search, activeDept, mergedData, allDepts]);
+  }, [search, activeDept]);
 
   const filteredTotal = useMemo(
     () => Object.values(filtered).reduce((sum, arr) => sum + arr.length, 0),
     [filtered]
   );
 
-  async function handleAdminLogin() {
-    setAdminLoggingIn(true);
-    try {
-      await loginWithGoogle();
-    } finally {
-      setAdminLoggingIn(false);
-    }
-  }
-
-  // ── Print data: all departments including dynamic approved ──
-  const printDepts = allDepts.filter((d) => (mergedData[d]?.length ?? 0) > 0);
+  const printDepts = DEPARTMENT_ORDER.filter((d) => (attendanceData[d]?.length ?? 0) > 0);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -116,7 +69,7 @@ export default function App() {
           </p>
         </div>
         {printDepts.map((dept) => {
-          const students = mergedData[dept] ?? [];
+          const students = attendanceData[dept] ?? [];
           if (students.length === 0) return null;
           return (
             <div key={dept} className="print-dept-block">
@@ -152,16 +105,10 @@ export default function App() {
                   Attendance Roster
                 </h1>
                 <p className="text-sm text-slate-500 mt-0.5">
-                  {filteredTotal} of {totalCount} students across {allDepts.length} departments
-                  {pending.length > 0 && isAdmin && (
-                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-700 font-medium">
-                      {pending.length} pending
-                    </span>
-                  )}
+                  {filteredTotal} of {totalCount} students across {DEPARTMENT_ORDER.length} departments
                 </p>
               </div>
 
-              {/* Action buttons */}
               <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                 <input
                   type="search"
@@ -171,18 +118,6 @@ export default function App() {
                   className="w-full sm:w-56 px-3 py-2 rounded-lg border border-slate-300 text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-400"
                 />
 
-                {/* Add my name */}
-                <button
-                  onClick={() => setShowAddModal(true)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium shadow-sm hover:bg-blue-700 active:bg-blue-800 transition-colors whitespace-nowrap"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                  </svg>
-                  Add My Name
-                </button>
-
-                {/* Print */}
                 <button
                   onClick={() => window.print()}
                   title="Export full roster as PDF"
@@ -196,7 +131,6 @@ export default function App() {
                   Print / PDF
                 </button>
 
-                {/* Export Excel */}
                 <button
                   onClick={() => exportToExcel(filtered, filteredTotal, activeDept)}
                   title={activeDept ? `Export ${activeDept} to Excel` : "Export all departments to Excel"}
@@ -207,46 +141,6 @@ export default function App() {
                   </svg>
                   Export Excel
                 </button>
-
-                {/* Admin */}
-                {isAdmin ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setShowAdminPanel(true)}
-                      className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium shadow-sm hover:bg-amber-600 transition-colors whitespace-nowrap"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                      Admin
-                      {pending.length > 0 && (
-                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
-                          {pending.length}
-                        </span>
-                      )}
-                    </button>
-                    <button
-                      onClick={logout}
-                      className="px-2 py-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-                      title="Sign out"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                      </svg>
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleAdminLogin}
-                    disabled={adminLoggingIn}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-600 text-sm font-medium shadow-sm hover:bg-slate-50 transition-colors whitespace-nowrap disabled:opacity-60"
-                  >
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 110-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0012.545 2C7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-.013z"/>
-                    </svg>
-                    {adminLoggingIn ? "Signing in…" : "Admin Login"}
-                  </button>
-                )}
               </div>
             </div>
 
@@ -262,9 +156,9 @@ export default function App() {
               >
                 All
               </button>
-              {allDepts.map((dept) => {
+              {DEPARTMENT_ORDER.map((dept) => {
                 const colors = DEPT_COLORS[dept] ?? { badge: "bg-slate-100 text-slate-700" };
-                const count = mergedData[dept]?.length ?? 0;
+                const count = attendanceData[dept]?.length ?? 0;
                 return (
                   <button
                     key={dept}
@@ -315,9 +209,7 @@ export default function App() {
                     {students.map((student, idx) => (
                       <div
                         key={student.matricNo + idx}
-                        className={`bg-white rounded-lg border shadow-sm px-3 py-2.5 hover:shadow-md transition-shadow relative ${
-                          student.source === "dynamic" ? "border-blue-200 ring-1 ring-blue-100" : "border-white/80"
-                        }`}
+                        className="bg-white rounded-lg border border-white/80 shadow-sm px-3 py-2.5 hover:shadow-md transition-shadow"
                       >
                         <p className="text-sm font-semibold text-slate-800 leading-tight">
                           {toTitleCase(student.name)}
@@ -325,9 +217,6 @@ export default function App() {
                         <p className="text-xs text-slate-400 mt-0.5 font-mono tracking-tight">
                           {student.matricNo}
                         </p>
-                        {student.source === "dynamic" && (
-                          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-400" title="Recently added" />
-                        )}
                       </div>
                     ))}
                   </div>
@@ -338,31 +227,9 @@ export default function App() {
         </main>
 
         <footer className="text-center py-6 text-xs text-slate-400">
-          Total attendance: {totalCount} students &nbsp;·&nbsp; {allDepts.length} departments
-          {approved.length > 0 && (
-            <span className="ml-2 text-blue-400">· {approved.length} added via roster</span>
-          )}
+          Total attendance: {totalCount} students &nbsp;·&nbsp; {DEPARTMENT_ORDER.length} departments
         </footer>
       </div>
-
-      {/* Modals */}
-      {showAddModal && (
-        <AddNameModal
-          onClose={() => setShowAddModal(false)}
-          onSubmit={addSubmission}
-        />
-      )}
-
-      {showAdminPanel && isAdmin && (
-        <AdminPanel
-          pending={pending}
-          approved={approved}
-          onApprove={approveSubmission}
-          onReject={rejectSubmission}
-          onDelete={deleteSubmission}
-          onClose={() => setShowAdminPanel(false)}
-        />
-      )}
     </div>
   );
 }
