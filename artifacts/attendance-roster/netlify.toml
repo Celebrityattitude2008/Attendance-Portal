@@ -1,0 +1,13 @@
+[build]
+  base    = "artifacts/attendance-roster"
+  command = "pnpm install --frozen-lockfile && pnpm run build"
+  publish = "dist"
+
+[build.environment]
+  BASE_PATH = "/"
+  NODE_VERSION = "20"
+
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
