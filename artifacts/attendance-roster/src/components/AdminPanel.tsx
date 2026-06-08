@@ -13,62 +13,82 @@ interface Props {
 export function AdminPanel({ pending, approved, onApprove, onReject, onDelete, onClose }: Props) {
   const [tab, setTab] = useState<"pending" | "approved">("pending");
   const [loading, setLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  async function handle(fn: () => Promise<void>, id: string) {
-    setLoading(id);
-    try { await fn(); } finally { setLoading(null); }
+  async function handle(fn: () => Promise<void>, key: string) {
+    setLoading(key);
+    setError(null);
+    try {
+      await fn();
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code ?? "";
+      if (code === "permission-denied") {
+        setError("Permission denied — your Firestore rules don't allow this action. Check the rules banner at the top of the page.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(null);
+    }
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 shrink-0">
           <div>
             <h2 className="text-lg font-bold text-slate-900">Admin Panel</h2>
             <p className="text-xs text-slate-500 mt-0.5">Review and manage attendance requests</p>
           </div>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
-            aria-label="Close"
-          >
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors" aria-label="Close">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
+        {/* Error banner */}
+        {error && (
+          <div className="mx-6 mt-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 flex items-start gap-2 shrink-0">
+            <svg className="w-4 h-4 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-xs font-semibold text-red-700">Action failed</p>
+              <p className="text-xs text-red-600 mt-0.5">{error}</p>
+            </div>
+            <button onClick={() => setError(null)} className="text-red-300 hover:text-red-500">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="flex border-b border-slate-200 px-6 shrink-0">
           <button
             onClick={() => setTab("pending")}
             className={`pb-3 pt-3 mr-6 text-sm font-semibold border-b-2 transition-colors ${
-              tab === "pending"
-                ? "border-amber-500 text-amber-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+              tab === "pending" ? "border-amber-500 text-amber-600" : "border-transparent text-slate-500 hover:text-slate-700"
             }`}
           >
             Pending
             {pending.length > 0 && (
-              <span className="ml-2 px-1.5 py-0.5 rounded-full text-xs bg-amber-100 text-amber-700">
-                {pending.length}
-              </span>
+              <span className="ml-2 px-1.5 py-0.5 rounded-full text-xs bg-amber-100 text-amber-700">{pending.length}</span>
             )}
           </button>
           <button
             onClick={() => setTab("approved")}
             className={`pb-3 pt-3 text-sm font-semibold border-b-2 transition-colors ${
-              tab === "approved"
-                ? "border-green-500 text-green-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+              tab === "approved" ? "border-green-500 text-green-600" : "border-transparent text-slate-500 hover:text-slate-700"
             }`}
           >
             Approved
             {approved.length > 0 && (
-              <span className="ml-2 px-1.5 py-0.5 rounded-full text-xs bg-green-100 text-green-700">
-                {approved.length}
-              </span>
+              <span className="ml-2 px-1.5 py-0.5 rounded-full text-xs bg-green-100 text-green-700">{approved.length}</span>
             )}
           </button>
         </div>
@@ -90,9 +110,7 @@ export function AdminPanel({ pending, approved, onApprove, onReject, onDelete, o
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-slate-800 truncate">{s.name}</p>
                       <p className="text-xs text-slate-500 font-mono">{s.matricNo}</p>
-                      <span className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
-                        {s.department}
-                      </span>
+                      <span className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">{s.department}</span>
                       {s.createdAt && (
                         <p className="text-xs text-slate-400 mt-0.5">
                           {s.createdAt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
@@ -133,9 +151,7 @@ export function AdminPanel({ pending, approved, onApprove, onReject, onDelete, o
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-slate-800 truncate">{s.name}</p>
                       <p className="text-xs text-slate-500 font-mono">{s.matricNo}</p>
-                      <span className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">
-                        {s.department}
-                      </span>
+                      <span className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">{s.department}</span>
                     </div>
                     <button
                       onClick={() => handle(() => onDelete(s.id), s.id + "-delete")}
