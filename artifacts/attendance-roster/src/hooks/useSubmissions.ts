@@ -25,34 +25,35 @@ export interface Submission {
 export function useSubmissions(isAdmin: boolean) {
   const [approved, setApproved] = useState<Submission[]>([]);
   const [pending, setPending] = useState<Submission[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [approvedError, setApprovedError] = useState<string | null>(null);
 
-  // Everyone can read approved submissions — filtered query passes security rules
+  // Public query — only approved docs, no orderBy so no composite index needed
   useEffect(() => {
     const q = query(
       collection(db, "submissions"),
-      where("status", "==", "approved"),
-      orderBy("createdAt", "desc")
+      where("status", "==", "approved")
     );
     const unsub = onSnapshot(
       q,
       (snap) => {
-        const docs = snap.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-          createdAt: d.data().createdAt?.toDate() ?? null,
-        })) as Submission[];
-        setApproved(docs);
-        setLoading(false);
+        setApprovedError(null);
+        setApproved(
+          snap.docs.map((d) => ({
+            id: d.id,
+            ...(d.data() as Omit<Submission, "id" | "createdAt">),
+            createdAt: (d.data().createdAt as { toDate?: () => Date } | null)?.toDate?.() ?? null,
+          }))
+        );
       },
-      () => {
-        setLoading(false);
+      (err) => {
+        console.error("[useSubmissions] approved query failed:", err.code, err.message);
+        setApprovedError(err.code);
       }
     );
     return unsub;
   }, []);
 
-  // Only admins fetch all submissions (to see pending/rejected)
+  // Admin-only query — all docs for managing pending requests
   useEffect(() => {
     if (!isAdmin) {
       setPending([]);
@@ -64,12 +65,14 @@ export function useSubmissions(isAdmin: boolean) {
       (snap) => {
         const docs = snap.docs.map((d) => ({
           id: d.id,
-          ...d.data(),
-          createdAt: d.data().createdAt?.toDate() ?? null,
-        })) as Submission[];
+          ...(d.data() as Omit<Submission, "id" | "createdAt">),
+          createdAt: (d.data().createdAt as { toDate?: () => Date } | null)?.toDate?.() ?? null,
+        }));
         setPending(docs.filter((s) => s.status === "pending"));
       },
-      () => {}
+      (err) => {
+        console.error("[useSubmissions] admin query failed:", err.code, err.message);
+      }
     );
     return unsub;
   }, [isAdmin]);
@@ -96,5 +99,5 @@ export function useSubmissions(isAdmin: boolean) {
     await deleteDoc(doc(db, "submissions", id));
   }
 
-  return { approved, pending, loading, addSubmission, approveSubmission, rejectSubmission, deleteSubmission };
+  return { approved, pending, approvedError, addSubmission, approveSubmission, rejectSubmission, deleteSubmission };
 }
