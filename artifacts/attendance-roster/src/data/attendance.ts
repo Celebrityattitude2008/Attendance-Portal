@@ -441,7 +441,7 @@ export const attendanceData: DepartmentData = {
     { "matricNo": "med/250448", "name": "Omaba Favour Obukovwo" },
     { "matricNo": "med/250534", "name": "Omoigberale Stephen Eseosa" },
     { "matricNo": "med/250428", "name": "Onose Precious" },
-    { "matricNo": "med/250488", "name": "OREWERE ENUEREIYEFA JOY" },
+    { "matricNo": "med/250488", "name": "Onyeuka Ukamaka Peculiar" },
     { "matricNo": "med/250424", "name": "Oseyemen Uwoghiren" },
     { "matricNo": "med/250480", "name": "Osuagwu Chisom Blessing" },
     { "matricNo": "med/250486", "name": "Usen Emmanuel" },
