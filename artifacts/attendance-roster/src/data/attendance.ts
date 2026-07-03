@@ -447,7 +447,7 @@ export const attendanceData: DepartmentData = {
     { "matricNo": "med/250486", "name": "Usen Emmanuel" },
     { "matricNo": "med/250490", "name": "Uzoh Chimamanda Ngozi" },
     { "matricNo": "med/250496", "name": "Yusuf Aisha" },
-    { "matricNo": "med/250418", "name": "Zifawei Atinuke" },
+    { "matricNo": "med/250418", "name": "Irehovbude Excellence Efose Oghenevowvero " },
     { "matricNo": "med/250710", "name": "Zuoke Chidera Emmanuel" }
   ],
   "Micro Biology": [
