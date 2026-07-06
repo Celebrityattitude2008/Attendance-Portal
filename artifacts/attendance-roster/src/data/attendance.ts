@@ -33,7 +33,7 @@ export const attendanceData: DepartmentData = {
     { "matricNo": "SCN/CSC/250456", "name": "ADETULA BLESSING TAMARA" },
     { "matricNo": "SCN/CSC/250471", "name": "ADETUTU OLUWATOSIN EMMANUEL" },
     { "matricNo": "SCN/CSC/250460", "name": "ADETUYI CHRISTIANA EGBOSUWE" },
-    { "matricNo": "SCN/CSC/250452", "name": "ADEWALE KEHINDE SAMUEL" },
+    { "matricNo": "SCN/CSC/250452", "name": "Osuide Michael" },
     { "matricNo": "SCN/CSC/230256", "name": "AFAMAN DANIEL" },
     { "matricNo": "SCN/CSC/250786", "name": "Agbonile Efosa Osamudiamen" },
     { "matricNo": "SCN/CSC/250123", "name": "AGBOR OGHENEVWOKE MARTINS" },
