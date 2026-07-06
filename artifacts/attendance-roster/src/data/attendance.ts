@@ -41,7 +41,6 @@ export const attendanceData: DepartmentData = {
     { "matricNo": "SCN/CSC/250147", "name": "Aidamenosa Nathaniel" },
     { "matricNo": "SCN/CSC/250433", "name": "AIGBE KOBY" },
     { "matricNo": "SCN/CSC/250368", "name": "AIGBE OSEMWENGIE GRACE" },
-    { "matricNo": "SCN/CSC/250716", "name": "Aika Raymond" },
     { "matricNo": "SCN/CSC/251051", "name": "AIMURIE OSAHENOGAE FAVOUR" },
     { "matricNo": "SCN/CSC/250190", "name": "Ajayi Emmanuel" },
     { "matricNo": "SCN/CSC/250082", "name": "Akenuwa Edamwen Kelvin" },
